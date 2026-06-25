@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>M9 英语题库答题系统</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div id="app">
+    <!-- 登录页 -->
+    <div id="login-page" class="page active">
+      <div class="login-container">
+        <div class="logo-area">
+          <div class="logo-icon">✈</div>
+          <h1>M9 英语题库</h1>
+          <p class="subtitle">Aviation English Training System</p>
+        </div>
+        <div class="login-card">
+          <div class="login-tabs">
+            <button class="tab-btn active" id="tab-login" onclick="switchTab('login')">登录</button>
+            <button class="tab-btn" id="tab-register" onclick="switchTab('register')">注册</button>
+          </div>
+          <!-- 登录表单 -->
+          <div class="login-form" id="login-form">
+            <div class="input-group">
+              <span class="input-icon">👤</span>
+              <input type="text" id="login-username" placeholder="请输入用户名" autocomplete="username">
+            </div>
+            <div class="input-group">
+              <span class="input-icon">🔒</span>
+              <input type="password" id="login-password" placeholder="请输入密码" autocomplete="current-password">
+            </div>
+            <button class="btn btn-login" onclick="doLogin()">登 录</button>
+          </div>
+          <!-- 注册表单 -->
+          <div class="login-form" id="register-form" style="display:none">
+            <div class="input-group">
+              <span class="input-icon">👤</span>
+              <input type="text" id="reg-username" placeholder="设置用户名（至少3位）" autocomplete="off">
+            </div>
+            <div class="input-group">
+              <span class="input-icon">🔒</span>
+              <input type="password" id="reg-password" placeholder="设置密码（至少4位）" autocomplete="new-password">
+            </div>
+            <div class="input-group">
+              <span class="input-icon">🔒</span>
+              <input type="password" id="reg-password2" placeholder="再次输入密码" autocomplete="new-password">
+            </div>
+            <button class="btn btn-login" onclick="doRegister()">注 册</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 首页 -->
+    <div id="home-page" class="page">
+      <div class="hero">
+        <div class="user-bar">
+          <span class="user-info" id="user-info-bar">👤</span>
+          <button class="btn btn-logout" onclick="doLogout()">退出登录</button>
+        </div>
+        <div class="logo-area">
+          <div class="logo-icon">✈</div>
+          <h1>M9 英语题库</h1>
+          <p class="subtitle">Aviation English Training System</p>
+        </div>
+        <div class="stats-bar">
+          <div class="stat-item">
+            <span class="stat-num" id="total-count">0</span>
+            <span class="stat-label">题目总数</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-num" id="en2cn-count">0</span>
+            <span class="stat-label">英译中</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-num" id="cn2en-count">0</span>
+            <span class="stat-label">中译英</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-num" id="en2en-count">0</span>
+            <span class="stat-label">英译英</span>
+          </div>
+        </div>
+        <div class="section-label">错题本</div>
+        <div class="wrongbook-bar" onclick="showWrongBook()">
+          <div class="wb-left">
+            <span class="wb-icon">📕</span>
+            <span class="wb-title">错题本</span>
+            <span class="wb-count" id="wb-my-wrong-count">0道错题</span>
+          </div>
+          <div class="wb-right">
+            <span class="wb-stat">我的错题率 <strong id="wb-my-wrong-rate">0%</strong></span>
+            <button class="btn btn-wb">查看错题</button>
+          </div>
+        </div>
+        <div class="section-label">专项练习</div>
+        <div class="practice-row">
+          <div class="practice-mini-card" onclick="startPractice('en2cn')">
+            <div class="pmc-icon">🇬🇧→🇨🇳</div>
+            <div class="pmc-title">英译中</div>
+            <div class="pmc-count" id="en2cn-btn-count">0题</div>
+            <button class="btn btn-pmc btn-pmc-en2cn" id="en2cn-btn">开始练习</button>
+            <div class="resume-info-mini" id="en2cn-resume-info" style="display:none">
+              <span id="en2cn-resume-text"></span>
+              <button class="btn btn-reset-mini" onclick="resetPractice('en2cn')">重置</button>
+            </div>
+          </div>
+          <div class="practice-mini-card" onclick="startPractice('cn2en')">
+            <div class="pmc-icon">🇨🇳→🇬🇧</div>
+            <div class="pmc-title">中译英</div>
+            <div class="pmc-count" id="cn2en-btn-count">0题</div>
+            <button class="btn btn-pmc btn-pmc-cn2en" id="cn2en-btn">开始练习</button>
+            <div class="resume-info-mini" id="cn2en-resume-info" style="display:none">
+              <span id="cn2en-resume-text"></span>
+              <button class="btn btn-reset-mini" onclick="resetPractice('cn2en')">重置</button>
+            </div>
+          </div>
+          <div class="practice-mini-card" onclick="startPractice('en2en')">
+            <div class="pmc-icon">🇬🇧→🇬🇧</div>
+            <div class="pmc-title">英译英</div>
+            <div class="pmc-count" id="en2en-btn-count">0题</div>
+            <button class="btn btn-pmc btn-pmc-en2en" id="en2en-btn">开始练习</button>
+            <div class="resume-info-mini" id="en2en-resume-info" style="display:none">
+              <span id="en2en-resume-text"></span>
+              <button class="btn btn-reset-mini" onclick="resetPractice('en2en')">重置</button>
+            </div>
+          </div>
+        </div>
+        <div class="section-label">综合模式</div>
+        <div class="mode-cards">
+          <div class="mode-card practice-card" onclick="startPractice('all')">
+            <div class="mode-icon">📚</div>
+            <h2>顺序练习</h2>
+            <p>按题库顺序刷全部题目，即时反馈，自动保存</p>
+            <div class="mode-features">
+              <span class="feature-tag">即时反馈</span>
+              <span class="feature-tag">进度记忆</span>
+            </div>
+            <button class="btn btn-practice" id="practice-btn">开始练习</button>
+            <div class="resume-info" id="practice-resume-info" style="display:none">
+              <span id="practice-resume-text"></span>
+              <button class="btn btn-reset" onclick="resetPractice('all')">重置进度</button>
+            </div>
+          </div>
+          <div class="mode-card random-card" onclick="startPractice('random')">
+            <div class="mode-icon">🎲</div>
+            <h2>随机练习</h2>
+            <p>随机出题，每次顺序不同，即时反馈，无进度记忆</p>
+            <div class="mode-features">
+              <span class="feature-tag">随机出题</span>
+              <span class="feature-tag">即时反馈</span>
+            </div>
+            <button class="btn btn-random">开始练习</button>
+          </div>
+          <div class="mode-card exam-card" onclick="startExam()">
+            <div class="mode-icon">📝</div>
+            <h2>考试模式</h2>
+            <p>随机抽取100题，限时2小时完成</p>
+            <div class="mode-features">
+              <span class="feature-tag">限时2小时</span>
+              <span class="feature-tag">进度记忆</span>
+            </div>
+            <button class="btn btn-exam" id="exam-btn">开始考试</button>
+            <div class="resume-info" id="exam-resume-info" style="display:none">
+              <span id="exam-resume-text"></span>
+              <button class="btn btn-reset" onclick="resetExam()">重置进度</button>
+            </div>
+          </div>
+        </div>
+        <div class="import-area">
+          <label class="import-btn" for="file-input">
+            <span>📥</span> 导入新题库（Excel）
+          </label>
+          <input type="file" id="file-input" accept=".xlsx,.xls" onchange="importExcel(event)" style="display:none">
+          <p class="import-hint">支持 .xlsx / .xls 格式，列格式：题型 | 试题内容 | 选项A | 选项B | 选项C | 答案</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 练习模式 -->
+    <div id="practice-page" class="page">
+      <div class="quiz-header">
+        <button class="back-btn" onclick="goHome()">← 返回</button>
+        <div class="quiz-title">练习模式</div>
+        <div class="practice-stats">
+          <span class="stat-badge accuracy-badge">准确率: <strong id="practice-accuracy">0%</strong></span>
+          <span class="stat-badge progress-badge">进度: <strong id="practice-progress">0/0</strong></span>
+        </div>
+      </div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar" id="practice-progress-bar" style="width:0%"></div>
+      </div>
+      <div class="question-container">
+        <div class="question-meta">
+          <span class="q-type-badge" id="practice-q-type">单选题</span>
+          <span class="q-number" id="practice-q-number">第 1 题</span>
+        </div>
+        <div class="question-text" id="practice-question"></div>
+        <div class="options-list" id="practice-options"></div>
+        <div class="result-panel" id="practice-result" style="display:none">
+          <div class="result-icon" id="practice-result-icon"></div>
+          <div class="result-text" id="practice-result-text"></div>
+        </div>
+        <div class="nav-btns">
+          <button class="btn btn-secondary" id="practice-prev" onclick="practiceNav(-1)">上一题</button>
+          <button class="btn btn-primary" id="practice-next-btn" onclick="practiceSubmit()">提交答案</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 考试模式 -->
+    <div id="exam-page" class="page">
+      <div class="quiz-header exam-header">
+        <button class="back-btn" onclick="confirmExitExam()">← 退出</button>
+        <div class="quiz-title">考试模式</div>
+        <div class="exam-timer-wrap">
+          <span class="timer-icon">⏱</span>
+          <span class="timer" id="exam-timer">02:00:00</span>
+        </div>
+      </div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar exam-bar" id="exam-progress-bar" style="width:0%"></div>
+      </div>
+      <div class="question-container">
+        <div class="question-meta">
+          <span class="q-type-badge" id="exam-q-type">单选题</span>
+          <span class="q-number" id="exam-q-number">第 1 题 / 共100题</span>
+        </div>
+        <div class="question-text" id="exam-question"></div>
+        <div class="options-list" id="exam-options"></div>
+        <div class="answered-hint" id="exam-answered-hint" style="display:none">✓ 已作答</div>
+        <div class="nav-btns">
+          <button class="btn btn-secondary" onclick="examNav(-1)">上一题</button>
+          <div class="exam-counter">
+            已作答 <strong id="exam-answered-count">0</strong>/100
+          </div>
+          <button class="btn btn-primary" onclick="examNav(1)">下一题</button>
+        </div>
+        <div class="exam-actions">
+          <button class="btn btn-question-map" onclick="toggleQuestionMap()">题目导航</button>
+          <button class="btn btn-submit-exam" onclick="confirmSubmitExam()">交卷</button>
+        </div>
+      </div>
+      <div class="question-map-overlay" id="question-map" style="display:none">
+        <div class="question-map-panel">
+          <div class="map-header">
+            <h3>题目导航</h3>
+            <button onclick="toggleQuestionMap()">✕</button>
+          </div>
+          <div class="map-legend">
+            <span class="legend-item"><span class="dot dot-answered"></span>已作答</span>
+            <span class="legend-item"><span class="dot dot-current"></span>当前题</span>
+            <span class="legend-item"><span class="dot dot-unanswered"></span>未作答</span>
+          </div>
+          <div class="map-grid" id="map-grid"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 考试结果页 -->
+    <div id="result-page" class="page">
+      <div class="result-container">
+        <div class="result-hero">
+          <div class="score-circle" id="score-circle">
+            <div class="score-value" id="final-score">0</div>
+            <div class="score-label">分</div>
+          </div>
+          <div class="result-grade" id="result-grade">未通过</div>
+          <p class="result-time" id="result-time-used"></p>
+        </div>
+        <div class="result-stats-grid">
+          <div class="result-stat">
+            <div class="rs-num" id="rs-correct">0</div>
+            <div class="rs-label">答对题数</div>
+          </div>
+          <div class="result-stat">
+            <div class="rs-num" id="rs-wrong">0</div>
+            <div class="rs-label">答错题数</div>
+          </div>
+          <div class="result-stat">
+            <div class="rs-num" id="rs-unanswered">0</div>
+            <div class="rs-label">未作答</div>
+          </div>
+          <div class="result-stat">
+            <div class="rs-num" id="rs-accuracy">0%</div>
+            <div class="rs-label">准确率</div>
+          </div>
+        </div>
+        <div class="result-actions">
+          <button class="btn btn-review" onclick="reviewExam()">查看答题详情</button>
+          <button class="btn btn-practice" onclick="goHome()">返回首页</button>
+        </div>
+      </div>
+      <div id="review-section" style="display:none">
+        <h3 class="review-title">答题详情</h3>
+        <div id="review-list"></div>
+      </div>
+    </div>
+
+    <!-- 错题本页面 -->
+    <div id="wrongbook-page" class="page">
+      <div class="quiz-header wb-header">
+        <button class="back-btn" onclick="goHome()">← 返回</button>
+        <div class="quiz-title">错题本</div>
+        <div class="practice-stats">
+          <span class="stat-badge">错题: <strong id="wb-total-wrong">0</strong></span>
+          <span class="stat-badge">错题率: <strong id="wb-total-rate">0%</strong></span>
+        </div>
+      </div>
+        <div class="wb-summary-bar">
+        <div class="wb-sum-item">
+          <div class="wb-sum-num" id="wb-sum-total-answered">0</div>
+          <div class="wb-sum-label">总作答题数</div>
+        </div>
+        <div class="wb-sum-item">
+          <div class="wb-sum-num wb-sum-wrong" id="wb-sum-total-wrong">0</div>
+          <div class="wb-sum-label">答错总次数</div>
+        </div>
+        <div class="wb-sum-item">
+          <div class="wb-sum-num wb-sum-rate" id="wb-sum-rate">0%</div>
+          <div class="wb-sum-label">我的错题率</div>
+        </div>
+        <div class="wb-sum-item">
+          <div class="wb-sum-num wb-sum-global" id="wb-sum-global-rate">-</div>
+          <div class="wb-sum-label">所有人正确率</div>
+        </div>
+      </div>
+      <div class="wb-filter-bar">
+        <button class="wb-filter-btn active" id="wb-filter-all" onclick="filterWrongBook('all')">全部错题</button>
+        <button class="wb-filter-btn" id="wb-filter-en2cn" onclick="filterWrongBook('en2cn')">英译中</button>
+        <button class="wb-filter-btn" id="wb-filter-cn2en" onclick="filterWrongBook('cn2en')">中译英</button>
+        <button class="wb-filter-btn" id="wb-filter-en2en" onclick="filterWrongBook('en2en')">英译英</button>
+        <button class="wb-filter-btn wb-clear-btn" onclick="clearWrongBook()">清空错题本</button>
+      </div>
+      <div class="wb-list-container" id="wb-list">
+        <p class="wb-empty">暂无错题记录</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="loading" class="loading-overlay">
+    <div class="loading-spinner"></div>
+    <p>加载中...</p>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>
