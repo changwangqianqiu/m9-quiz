@@ -938,3 +938,41 @@ function showToast(msg) {
   toast.classList.add('show');
   setTimeout(() => toast.classList.remove('show'), 3000);
 }
+
+/* ===== DATA BACKUP / RESTORE ===== */
+async function exportData() {
+  if (!currentUser) { showToast('请先登录'); return; }
+  try {
+    const res = await fetch('/api/export-data', {
+      headers: { 'X-Username': currentUser }
+    });
+    if (!res.ok) throw new Error('导出失败');
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${currentUser}_backup.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('✅ 数据导出成功');
+  } catch (e) {
+    showToast('导出失败，请重试');
+  }
+}
+
+async function importData(event) {
+  if (!currentUser) { showToast('请先登录'); return; }
+  const file = event.target.files[0];
+  if (!file) return;
+  try {
+    const text = await file.text();
+    const data = JSON.parse(text);
+    if (!data.data) throw new Error('格式错误');
+    await apiPost('/api/import-data', data, true);
+    showToast('✅ 数据导入成功，正在刷新...');
+    setTimeout(() => location.reload(), 1500);
+  } catch (e) {
+    showToast('导入失败：文件格式不正确');
+  }
+  event.target.value = '';
+}

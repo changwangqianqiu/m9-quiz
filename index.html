@@ -176,6 +176,14 @@
           <input type="file" id="file-input" accept=".xlsx,.xls" onchange="importExcel(event)" style="display:none">
           <p class="import-hint">支持 .xlsx / .xls 格式，列格式：题型 | 试题内容 | 选项A | 选项B | 选项C | 答案</p>
         </div>
+        <div class="data-backup-area">
+          <button class="btn btn-backup" onclick="exportData()">📤 导出我的数据</button>
+          <label class="import-btn backup-import-btn" for="backup-input">
+            <span>📥</span> 导入数据备份
+          </label>
+          <input type="file" id="backup-input" accept=".json" onchange="importData(event)" style="display:none">
+          <p class="import-hint">导出/导入你的答题记录、错题本等数据</p>
+        </div>
       </div>
     </div>
 
