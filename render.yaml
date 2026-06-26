@@ -7,3 +7,7 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
+    disk:
+      name: quiz-data
+      mountPath: /workspace/quiz-app/data
+      sizeGB: 1
