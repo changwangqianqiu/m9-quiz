@@ -66,7 +66,7 @@ function startServerPoll() {
 
 /* ===== API Helpers ===== */
 async function apiGet(path) {
-  return apiFetch('GET', path);
+  return apiFetch('GET', path, null, true);
 }
 async function apiPut(path, data) {
   return apiFetch('PUT', path, data, true);
