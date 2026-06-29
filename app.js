@@ -536,9 +536,9 @@ async function practiceSubmit() {
   s.answered[s.currentIdx] = { selected: practiceSelected.sort().join(''), answer: q.answer, correct };
   practiceSelected = [];
 
-  // Record answer to server
-  await recordAnswer(q, selectedStr, correct);
-  await savePracticeState();
+  // 后台异步记录（不阻塞 UI）
+  recordAnswer(q, selectedStr, correct);
+  savePracticeState();
   renderPracticeQuestion();
 }
 
@@ -714,13 +714,15 @@ async function submitExam() {
   s.timeUsed = Math.min(s.totalTime - s.timeLeft, s.totalTime);
 
   let score = 0;
+  const promises = [];
   for (let i = 0; i < s.totalExam; i++) {
     const q = s.questions[i];
     const userAns = s.answers[i] || '';
     const isCorrect = userAns.split('').sort().join('') === q.answer.split('').sort().join('');
     if (isCorrect) score++;
-    await recordAnswer(q, userAns, isCorrect);
+    promises.push(recordAnswer(q, userAns, isCorrect));
   }
+  Promise.all(promises); // 并行发送，不阻塞
   s.score = score;
   await apiDelete('/exam');
   showExamResult();
@@ -812,17 +814,13 @@ function updateTimerDisplay() {
 /* ===== ANSWER RECORDING ===== */
 async function recordAnswer(q, userAns, correct) {
   if (!currentUser) return;
-  try {
-    await apiPost('/record-answer', { questionId: q.id, correct, username: currentUser }, false);
-  } catch (e) { console.error('record-answer failed:', e); }
-  // Wrong book
-  try {
-    if (!correct) {
-      await apiPost('/record-wrong', { questionId: q.id, wrongAnswer: userAns }, true);
-    } else {
-      await apiPost('/remove-wrong', { questionId: q.id }, true);
-    }
-  } catch (e) { console.error('wrongbook update failed:', e); }
+  // 并行发送，不阻塞
+  const p1 = apiPost('/record-answer', { questionId: q.id, correct, username: currentUser }, false).catch(e => {});
+  const p2 = correct
+    ? apiPost('/remove-wrong', { questionId: q.id }, true).catch(e => {})
+    : apiPost('/record-wrong', { questionId: q.id, wrongAnswer: userAns }, true).catch(e => {});
+  // 不 await，fire-and-forget
+  Promise.all([p1, p2]);
 }
 
 /* ===== WRONG BOOK ===== */
